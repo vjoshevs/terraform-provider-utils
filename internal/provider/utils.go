@@ -83,7 +83,7 @@ func MergeListItem(ctx context.Context, dst, key, src reflect.Value) {
 						x = x.Elem()
 					}
 					// check if element exists in dst map and value is the same as in src map
-					if x.IsValid() && sValue.Interface() == x.Interface() {
+					if x.IsValid() && sValue.IsValid() && sValue.Interface() == x.Interface() {
 						comparison = true
 						continue
 					}
