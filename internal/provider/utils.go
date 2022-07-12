@@ -40,7 +40,7 @@ func MergeMaps(ctx context.Context, dst, src reflect.Value) error {
 			}
 			dValue = reflect.ValueOf(dst.MapIndex(sKey).Interface())
 			if dValue.Kind() == reflect.Slice {
-				// interate over source slice elements and add merge with dst list
+				// iterate over source slice elements and add merge with dst list
 				for i := 0; i < sValue.Len(); i++ {
 					MergeListItem(ctx, dst, sKey, sValue.Index(i))
 				}
@@ -103,7 +103,7 @@ func MergeListItem(ctx context.Context, dst, key, src reflect.Value) {
 		// check if primitive value exists in dst and if so return
 		slice := dst.MapIndex(key).Elem()
 		for i := 0; i < slice.Len(); i++ {
-			if slice.Index(i).Elem().String() == src.String() {
+			if slice.Index(i).Elem().IsValid() && src.IsValid() && slice.Index(i).Elem().Interface() == src.Interface() {
 				return
 			}
 		}
