@@ -75,6 +75,10 @@ EOT
 
 - `input` (List of String) A list of YAML strings that is merged into the `output` attribute.
 
+### Optional
+
+- `merge_list_items` (Boolean) Merge list entries if all primitive values match. Default value is `true`.
+
 ### Read-Only
 
 - `output` (String) The merged output.

@@ -1,12 +1,11 @@
 package provider
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 )
 
-func MergeMaps(ctx context.Context, dst, src reflect.Value) error {
+func MergeMaps(dst, src reflect.Value, mergeListItems bool) error {
 
 	if dst.Kind() != reflect.Map || src.Kind() != reflect.Map {
 		return fmt.Errorf("[ERROR] src and/or dst in MergeMaps not a Map.")
@@ -31,7 +30,7 @@ func MergeMaps(ctx context.Context, dst, src reflect.Value) error {
 			}
 			// merge src map into dst map
 			dValue = reflect.ValueOf(dst.MapIndex(sKey).Interface())
-			MergeMaps(ctx, dValue, sValue)
+			MergeMaps(dValue, sValue, mergeListItems)
 		} else if sValue.Kind() == reflect.Slice {
 			dValue := dst.MapIndex(sKey)
 			// if slice does not exist in dst, add empty slice
@@ -42,7 +41,7 @@ func MergeMaps(ctx context.Context, dst, src reflect.Value) error {
 			if dValue.Kind() == reflect.Slice {
 				// iterate over source slice elements and add merge with dst list
 				for i := 0; i < sValue.Len(); i++ {
-					MergeListItem(ctx, dst, sKey, sValue.Index(i))
+					MergeListItem(dst, sKey, sValue.Index(i), mergeListItems)
 				}
 			}
 		} else {
@@ -53,7 +52,7 @@ func MergeMaps(ctx context.Context, dst, src reflect.Value) error {
 	return nil
 }
 
-func MergeListItem(ctx context.Context, dst, key, src reflect.Value) {
+func MergeListItem(dst, key, src reflect.Value, mergeListItems bool) {
 	dValue := reflect.ValueOf(dst.MapIndex(key).Interface())
 	if src.Kind() == reflect.Interface {
 		src = src.Elem()
@@ -92,9 +91,9 @@ func MergeListItem(ctx context.Context, dst, key, src reflect.Value) {
 				}
 			}
 			// Check if all primitive values have matched AND at least one comparison was done
-			if match && comparison {
+			if match && comparison && mergeListItems {
 				dv := reflect.ValueOf(dst.MapIndex(key).Elem().Index(i).Interface())
-				MergeMaps(ctx, dv, src)
+				MergeMaps(dv, src, mergeListItems)
 				return
 			}
 		}

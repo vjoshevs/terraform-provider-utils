@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/netascode/terraform-provider-utils/internal/provider/helpers"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,13 +30,23 @@ func (t dataSourceYamlMergeType) GetSchema(ctx context.Context) (tfsdk.Schema, d
 				Type:        types.StringType,
 				Computed:    true,
 			},
+			"merge_list_items": {
+				Description: "Merge list entries if all primitive values match. Default value is `true`.",
+				Type:        types.BoolType,
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: tfsdk.AttributePlanModifiers{
+					helpers.BooleanDefaultModifier(true),
+				},
+			},
 		},
 	}, nil
 }
 
 type YamlMerge struct {
-	Input  []string     `tfsdk:"input"`
-	Output types.String `tfsdk:"output"`
+	Input          []string     `tfsdk:"input"`
+	Output         types.String `tfsdk:"output"`
+	MergeListItems types.Bool   `tfsdk:"merge_list_items"`
 }
 
 func (t dataSourceYamlMergeType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
@@ -77,7 +88,7 @@ func (d dataSourceYamlMerge) Read(ctx context.Context, req tfsdk.ReadDataSourceR
 
 		vData := reflect.ValueOf(data)
 
-		err = MergeMaps(ctx, vMerged, vData)
+		err = MergeMaps(vMerged, vData, config.MergeListItems.Value)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error merging YAML",
