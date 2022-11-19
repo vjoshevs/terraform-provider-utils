@@ -86,6 +86,10 @@ func MergeListItem(dst, key, src reflect.Value, mergeListItems bool) {
 						comparison = true
 						continue
 					}
+					// if value does not exist in dst map -> continue
+					if !x.IsValid() && sValue.IsValid() {
+						continue
+					}
 					comparison = true
 					match = false
 				}
@@ -98,7 +102,7 @@ func MergeListItem(dst, key, src reflect.Value, mergeListItems bool) {
 			}
 		}
 
-	} else {
+	} else if mergeListItems {
 		// check if primitive value exists in dst and if so return
 		slice := dst.MapIndex(key).Elem()
 		for i := 0; i < slice.Len(); i++ {

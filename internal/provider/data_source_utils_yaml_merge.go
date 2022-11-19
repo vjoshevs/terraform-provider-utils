@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"reflect"
 
@@ -30,6 +32,11 @@ func (t yamlMergeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 		MarkdownDescription: "Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged. ",
 
 		Attributes: map[string]tfsdk.Attribute{
+			"id": {
+				Description: "Hexadecimal encoding of the checksum of the output.",
+				Type:        types.StringType,
+				Computed:    true,
+			},
 			"input": {
 				Description: "A list of YAML strings that is merged into the `output` attribute.",
 				Type:        types.ListType{ElemType: types.StringType},
@@ -50,6 +57,7 @@ func (t yamlMergeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 }
 
 type YamlMerge struct {
+	Id             types.String `tfsdk:"id"`
 	Input          []string     `tfsdk:"input"`
 	Output         types.String `tfsdk:"output"`
 	MergeListItems types.Bool   `tfsdk:"merge_list_items"`
@@ -106,6 +114,9 @@ func (d yamlMergeDataSource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	config.Output = types.StringValue(string(output))
+
+	checksum := sha1.Sum(output)
+	config.Id = types.StringValue(hex.EncodeToString(checksum[:]))
 
 	diags = resp.State.Set(ctx, &config)
 	resp.Diagnostics.Append(diags...)
