@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/netascode/terraform-provider-utils/internal/provider/helpers"
 	"gopkg.in/yaml.v3"
 )
 
@@ -34,10 +33,6 @@ func (t dataSourceYamlMergeType) GetSchema(ctx context.Context) (tfsdk.Schema, d
 				Description: "Merge list entries if all primitive values match. Default value is `true`.",
 				Type:        types.BoolType,
 				Optional:    true,
-				Computed:    true,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					helpers.BooleanDefaultModifier(true),
-				},
 			},
 		},
 	}, nil
@@ -69,6 +64,10 @@ func (d dataSourceYamlMerge) Read(ctx context.Context, req tfsdk.ReadDataSourceR
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if config.MergeListItems.IsUnknown() || config.MergeListItems.IsNull() {
+		config.MergeListItems.Value = true
 	}
 
 	merged := map[interface{}]interface{}{}

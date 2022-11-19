@@ -1,3 +1,7 @@
+## 0.1.4 (unreleased)
+
+- Fix default value of `merge_list_items` attribute
+
 ## 0.1.3
 
 - Introduce `merge_list_items` flag (default value is `true`) to disable merging of list items
