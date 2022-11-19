@@ -1,4 +1,4 @@
-## 0.1.5 (unreleased)
+## 0.2.0
 
 - Append matching primitive list items if `merge_list_items` set to `false`
 - Deep merge list items with extra primitive values if `merge_list_items` set to `true`
