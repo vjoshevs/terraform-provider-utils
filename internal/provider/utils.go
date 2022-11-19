@@ -76,23 +76,22 @@ func MergeListItem(dst, key, src reflect.Value, mergeListItems bool) {
 				if sValue.Kind() == reflect.Map || sValue.Kind() == reflect.Slice {
 					// we only compare primitive types
 					continue
-				} else {
-					x := dValue.Index(i).Elem().MapIndex(sKey)
-					if x.Kind() == reflect.Interface {
-						x = x.Elem()
-					}
-					// check if element exists in dst map and value is the same as in src map
-					if x.IsValid() && sValue.IsValid() && sValue.Interface() == x.Interface() {
-						comparison = true
-						continue
-					}
-					// if value does not exist in dst map -> continue
-					if !x.IsValid() && sValue.IsValid() {
-						continue
-					}
-					comparison = true
-					match = false
 				}
+				x := dValue.Index(i).Elem().MapIndex(sKey)
+				if x.Kind() == reflect.Interface {
+					x = x.Elem()
+				}
+				// check if element exists in dst map and value is the same as in src map
+				if x.IsValid() && sValue.IsValid() && sValue.Interface() == x.Interface() {
+					comparison = true
+					continue
+				}
+				// if value does not exist in dst map -> continue
+				if !x.IsValid() && sValue.IsValid() {
+					continue
+				}
+				comparison = true
+				match = false
 			}
 			// Check if all primitive values have matched AND at least one comparison was done
 			if match && comparison && mergeListItems {
