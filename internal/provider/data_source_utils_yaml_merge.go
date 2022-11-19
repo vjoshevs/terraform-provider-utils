@@ -5,15 +5,26 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"gopkg.in/yaml.v3"
 )
 
-type dataSourceYamlMergeType struct{}
+var _ datasource.DataSource = (*yamlMergeDataSource)(nil)
 
-func (t dataSourceYamlMergeType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func NewYamlMergeDataSource() datasource.DataSource {
+	return &yamlMergeDataSource{}
+}
+
+type yamlMergeDataSource struct{}
+
+func (d *yamlMergeDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = "utils_yaml_merge"
+}
+
+func (t yamlMergeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged. ",
@@ -44,19 +55,7 @@ type YamlMerge struct {
 	MergeListItems types.Bool   `tfsdk:"merge_list_items"`
 }
 
-func (t dataSourceYamlMergeType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
-
-	return dataSourceYamlMerge{
-		provider: provider,
-	}, diags
-}
-
-type dataSourceYamlMerge struct {
-	provider provider
-}
-
-func (d dataSourceYamlMerge) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d yamlMergeDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var config YamlMerge
 
 	// Read config
@@ -67,7 +66,7 @@ func (d dataSourceYamlMerge) Read(ctx context.Context, req tfsdk.ReadDataSourceR
 	}
 
 	if config.MergeListItems.IsUnknown() || config.MergeListItems.IsNull() {
-		config.MergeListItems.Value = true
+		config.MergeListItems = types.BoolValue(true)
 	}
 
 	merged := map[interface{}]interface{}{}
@@ -87,7 +86,7 @@ func (d dataSourceYamlMerge) Read(ctx context.Context, req tfsdk.ReadDataSourceR
 
 		vData := reflect.ValueOf(data)
 
-		err = MergeMaps(vMerged, vData, config.MergeListItems.Value)
+		err = MergeMaps(vMerged, vData, config.MergeListItems.ValueBool())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error merging YAML",
@@ -106,7 +105,7 @@ func (d dataSourceYamlMerge) Read(ctx context.Context, req tfsdk.ReadDataSourceR
 		return
 	}
 
-	config.Output = types.String{Value: string(output)}
+	config.Output = types.StringValue(string(output))
 
 	diags = resp.State.Set(ctx, &config)
 	resp.Diagnostics.Append(diags...)
