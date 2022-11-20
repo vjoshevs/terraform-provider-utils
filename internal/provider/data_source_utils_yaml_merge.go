@@ -29,7 +29,7 @@ func (d *yamlMergeDataSource) Metadata(_ context.Context, _ datasource.MetadataR
 func (t yamlMergeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged. ",
+		MarkdownDescription: "Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged. YAML `!env` tags can be used to resolve values from environment variables.",
 
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
@@ -83,7 +83,7 @@ func (d yamlMergeDataSource) Read(ctx context.Context, req datasource.ReadReques
 		var data map[interface{}]interface{}
 		b := []byte(input)
 
-		err := yaml.Unmarshal(b, &data)
+		err := YamlUnmarshal(b, &data)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error reading YAML string",

@@ -1,7 +1,11 @@
+/* 
+export ELEM1=value1
+*/
+
 locals {
   yaml_1 = <<-EOT
     root:
-      elem1: value1
+      elem1: !env ELEM1
       child1:
         cc1: 1
     list:

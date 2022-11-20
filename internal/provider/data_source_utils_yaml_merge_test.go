@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -13,7 +14,7 @@ func TestAccDataSourceUtilsYamlMerge(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceUtilsYamlMerge_config(basic_inputYaml1, basic_inputYaml2),
+				Config: testAccDataSourceUtilsYamlMerge_config(basic_inputYaml1, basic_inputYaml2, map[string]string{"ELEM1": "value1"}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.utils_yaml_merge.test", "output", basic_ouputYaml),
 				),
@@ -22,7 +23,10 @@ func TestAccDataSourceUtilsYamlMerge(t *testing.T) {
 	})
 }
 
-func testAccDataSourceUtilsYamlMerge_config(yaml1, yaml2 string) string {
+func testAccDataSourceUtilsYamlMerge_config(yaml1, yaml2 string, envs map[string]string) string {
+	for k, v := range envs {
+		os.Setenv(k, v)
+	}
 	return fmt.Sprintf(`
 	locals {
 		yaml1 = <<-EOT%sEOT
@@ -37,7 +41,7 @@ func testAccDataSourceUtilsYamlMerge_config(yaml1, yaml2 string) string {
 
 const basic_inputYaml1 = `
 root:
-  elem1: value1
+  elem1: !env ELEM1
   child1:
     cc1: 1
 list:

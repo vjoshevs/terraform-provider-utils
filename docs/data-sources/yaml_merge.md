@@ -3,20 +3,24 @@
 page_title: "utils_yaml_merge Data Source - terraform-provider-utils"
 subcategory: ""
 description: |-
-  Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged.
+  Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged. YAML !env tags can be used to resolve values from environment variables.
 ---
 
 # utils_yaml_merge (Data Source)
 
-Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged.
+Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged. YAML `!env` tags can be used to resolve values from environment variables.
 
 ## Example Usage
 
 ```terraform
+/* 
+export ELEM1=value1
+*/
+
 locals {
   yaml_1 = <<-EOT
     root:
-      elem1: value1
+      elem1: !env ELEM1
       child1:
         cc1: 1
     list:
@@ -81,6 +85,7 @@ EOT
 
 ### Read-Only
 
+- `id` (String) Hexadecimal encoding of the checksum of the output.
 - `output` (String) The merged output.
 
 

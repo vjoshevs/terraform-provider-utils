@@ -1,3 +1,7 @@
+## 0.2.1 (unreleased)
+
+- Add support for YAML `!env` tags to resolve values from environment variables
+
 ## 0.2.0
 
 - Append matching primitive list items if `merge_list_items` set to `false`
