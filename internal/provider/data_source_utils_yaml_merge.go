@@ -8,8 +8,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"gopkg.in/yaml.v3"
 )
@@ -26,34 +25,31 @@ func (d *yamlMergeDataSource) Metadata(_ context.Context, _ datasource.MetadataR
 	resp.TypeName = "utils_yaml_merge"
 }
 
-func (t yamlMergeDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (d *yamlMergeDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Merge a list of YAML strings into a single YAML string, where maps are deep merged and list entries are compared against existing list entries and if all primitive values match, the entries are deep merged. YAML `!env` tags can be used to resolve values from environment variables.",
 
-		Attributes: map[string]tfsdk.Attribute{
-			"id": {
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
 				Description: "Hexadecimal encoding of the checksum of the output.",
-				Type:        types.StringType,
 				Computed:    true,
 			},
-			"input": {
+			"input": schema.ListAttribute{
 				Description: "A list of YAML strings that is merged into the `output` attribute.",
-				Type:        types.ListType{ElemType: types.StringType},
+				ElementType: types.StringType,
 				Required:    true,
 			},
-			"output": {
+			"output": schema.StringAttribute{
 				Description: "The merged output.",
-				Type:        types.StringType,
 				Computed:    true,
 			},
-			"merge_list_items": {
+			"merge_list_items": schema.BoolAttribute{
 				Description: "Merge list entries if all primitive values match. Default value is `true`.",
-				Type:        types.BoolType,
 				Optional:    true,
 			},
 		},
-	}, nil
+	}
 }
 
 type YamlMerge struct {
@@ -63,7 +59,7 @@ type YamlMerge struct {
 	MergeListItems types.Bool   `tfsdk:"merge_list_items"`
 }
 
-func (d yamlMergeDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *yamlMergeDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var config YamlMerge
 
 	// Read config
