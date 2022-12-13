@@ -98,7 +98,7 @@ func TestListItem(t *testing.T) {
 				},
 			},
 		},
-		// append matching primitive list items
+		// merge matching primitive list items
 		{
 			dst: map[interface{}]interface{}{
 				"list": []interface{}{
@@ -113,7 +113,6 @@ func TestListItem(t *testing.T) {
 				"list": []interface{}{
 					"abc",
 					"def",
-					"abc",
 				},
 			},
 		},
@@ -258,6 +257,35 @@ func TestListItem(t *testing.T) {
 							"elem2": "value2",
 							"elem3": "value3",
 						},
+					},
+				},
+			},
+		},
+		// not merge matching dict list items with extra dst and src primitive attribute
+		{
+			dst: map[interface{}]interface{}{
+				"list": []interface{}{
+					map[interface{}]interface{}{
+						"name":  "abc",
+						"name2": "def",
+					},
+				},
+			},
+			key: "list",
+			src: map[interface{}]interface{}{
+				"name":  "abc",
+				"name3": "ghi",
+			},
+			mergeListItems: true,
+			result: map[interface{}]interface{}{
+				"list": []interface{}{
+					map[interface{}]interface{}{
+						"name":  "abc",
+						"name2": "def",
+					},
+					map[interface{}]interface{}{
+						"name":  "abc",
+						"name3": "ghi",
 					},
 				},
 			},

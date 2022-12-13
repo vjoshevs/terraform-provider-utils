@@ -57,10 +57,12 @@ func MergeListItem(dst, key, src reflect.Value, mergeListItems bool) {
 	if src.Kind() == reflect.Interface {
 		src = src.Elem()
 	}
-	if src.Kind() == reflect.Map {
+	if src.Kind() == reflect.Map && mergeListItems {
 		for i := 0; i < dValue.Len(); i++ {
 			match := true
 			comparison := false
+			uniqueSource := false
+			uniqueDest := false
 			// iterate over all source map keys and values
 			iter := src.MapRange()
 			for iter.Next() {
@@ -88,24 +90,59 @@ func MergeListItem(dst, key, src reflect.Value, mergeListItems bool) {
 				}
 				// if value does not exist in dst map -> continue
 				if !x.IsValid() && sValue.IsValid() {
+					uniqueSource = true
+					continue
+				}
+				comparison = true
+				match = false
+			}
+			// iterate over all dst map keys and values
+			iter = dValue.Index(i).Elem().MapRange()
+			for iter.Next() {
+				dKey := iter.Key()
+				if dKey.Kind() == reflect.Interface {
+					dKey = dKey.Elem()
+				}
+				dValue := iter.Value()
+				if dValue.Kind() == reflect.Interface {
+					dValue = dValue.Elem()
+				}
+
+				if dValue.Kind() == reflect.Map || dValue.Kind() == reflect.Slice {
+					// we only compare primitive types
+					continue
+				}
+				x := src.MapIndex(dKey)
+				if x.Kind() == reflect.Interface {
+					x = x.Elem()
+				}
+				// check if element exists in src map and value is the same as in dst map
+				if x.IsValid() && dValue.IsValid() && dValue.Interface() == x.Interface() {
+					comparison = true
+					continue
+				}
+				// if value does not exist in src map -> continue
+				if !x.IsValid() && dValue.IsValid() {
+					uniqueDest = true
 					continue
 				}
 				comparison = true
 				match = false
 			}
 			// Check if all primitive values have matched AND at least one comparison was done
-			if match && comparison && mergeListItems {
+			if match && comparison && !(uniqueSource && uniqueDest) {
 				dv := reflect.ValueOf(dst.MapIndex(key).Elem().Index(i).Interface())
 				MergeMaps(dv, src, mergeListItems)
 				return
 			}
 		}
 
-	} else if mergeListItems {
+	} else {
 		// check if primitive value exists in dst and if so return
 		slice := dst.MapIndex(key).Elem()
 		for i := 0; i < slice.Len(); i++ {
-			if slice.Index(i).Elem().IsValid() && src.IsValid() && slice.Index(i).Elem().Interface() == src.Interface() {
+			element := slice.Index(i).Elem()
+			if element.IsValid() && src.IsValid() && element.Kind() != reflect.Map && element.Kind() != reflect.Slice && element.Interface() == src.Interface() {
 				return
 			}
 		}
