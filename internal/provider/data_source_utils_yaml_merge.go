@@ -21,8 +21,8 @@ func NewYamlMergeDataSource() datasource.DataSource {
 
 type yamlMergeDataSource struct{}
 
-func (d *yamlMergeDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = "utils_yaml_merge"
+func (d *yamlMergeDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_yaml_merge"
 }
 
 func (d *yamlMergeDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

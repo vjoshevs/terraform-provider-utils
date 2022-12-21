@@ -22,6 +22,11 @@ type utilsProvider struct {
 	version string
 }
 
+// Metadata returns the provider type name.
+func (p *utilsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "utils"
+}
+
 func (p *utilsProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 }
 
