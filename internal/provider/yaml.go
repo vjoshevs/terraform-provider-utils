@@ -17,7 +17,9 @@ type CustomTagProcessor struct {
 }
 
 func (i *CustomTagProcessor) UnmarshalYAML(value *yaml.Node) error {
+	tagResolversMutex.Lock()
 	resolved, err := resolveTags(value)
+	tagResolversMutex.Unlock()
 	if err != nil {
 		return err
 	}
@@ -25,13 +27,11 @@ func (i *CustomTagProcessor) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func resolveTags(node *yaml.Node) (*yaml.Node, error) {
-	tagResolversMutex.Lock()
 	for tag, fn := range tagResolvers {
 		if node.Tag == tag {
 			return fn(node)
 		}
 	}
-	tagResolversMutex.Unlock()
 	if node.Kind == yaml.SequenceNode || node.Kind == yaml.MappingNode {
 		var err error
 		for i := range node.Content {

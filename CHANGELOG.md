@@ -1,3 +1,7 @@
+## 0.2.4 (unreleased)
+
+- Fix deadlock when resolving environment variables
+
 ## 0.2.3
 
 - Fix crash due to concurrency issue
