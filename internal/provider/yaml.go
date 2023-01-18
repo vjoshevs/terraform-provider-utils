@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 
 	"gopkg.in/yaml.v3"
 )
 
 var tagResolvers = make(map[string]func(*yaml.Node) (*yaml.Node, error))
+var tagResolversMutex = &sync.Mutex{}
 
 type CustomTagProcessor struct {
 	target interface{}
@@ -23,11 +25,13 @@ func (i *CustomTagProcessor) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func resolveTags(node *yaml.Node) (*yaml.Node, error) {
+	tagResolversMutex.Lock()
 	for tag, fn := range tagResolvers {
 		if node.Tag == tag {
 			return fn(node)
 		}
 	}
+	tagResolversMutex.Unlock()
 	if node.Kind == yaml.SequenceNode || node.Kind == yaml.MappingNode {
 		var err error
 		for i := range node.Content {
@@ -53,7 +57,9 @@ func resolveEnv(node *yaml.Node) (*yaml.Node, error) {
 }
 
 func AddResolvers(tag string, fn func(*yaml.Node) (*yaml.Node, error)) {
+	tagResolversMutex.Lock()
 	tagResolvers[tag] = fn
+	tagResolversMutex.Unlock()
 }
 
 func YamlUnmarshal(in []byte, out interface{}) error {

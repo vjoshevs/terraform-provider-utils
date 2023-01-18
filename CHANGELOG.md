@@ -1,4 +1,8 @@
-# 0.2.2
+## 0.2.3 (unreleased)
+
+- Fix crash due to concurrency issue
+
+## 0.2.2
 
 - Do not merge YAML dictionary list items, where each list item has unique attributes with primitive values
 
