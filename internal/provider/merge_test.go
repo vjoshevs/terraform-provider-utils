@@ -43,6 +43,28 @@ func TestMergeMaps(t *testing.T) {
 				},
 			},
 		},
+		// merge maps with null values
+		{
+			dst: map[interface{}]interface{}{
+				"root": map[interface{}]interface{}{
+					"child1": map[interface{}]interface{}{
+						"child2": "abc",
+					},
+				},
+			},
+			src: map[interface{}]interface{}{
+				"root": map[interface{}]interface{}{
+					"child1": nil,
+				},
+			},
+			result: map[interface{}]interface{}{
+				"root": map[interface{}]interface{}{
+					"child1": map[interface{}]interface{}{
+						"child2": "abc",
+					},
+				},
+			},
+		},
 	}
 
 	for _, c := range cases {

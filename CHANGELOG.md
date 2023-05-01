@@ -1,3 +1,7 @@
+## 0.2.5 (unreleased)
+
+- Do not overwrite existing values with empty/null values
+
 ## 0.2.4
 
 - Fix deadlock when resolving environment variables

@@ -46,7 +46,9 @@ func MergeMaps(dst, src reflect.Value, mergeListItems bool) error {
 			}
 		} else {
 			// else we have primitive type -> add/replace dst value
-			dst.SetMapIndex(sKey, sValue)
+			if sValue.Kind() != reflect.Invalid {
+				dst.SetMapIndex(sKey, sValue)
+			}
 		}
 	}
 	return nil
