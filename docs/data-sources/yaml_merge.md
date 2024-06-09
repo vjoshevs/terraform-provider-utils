@@ -87,5 +87,3 @@ EOT
 
 - `id` (String) Hexadecimal encoding of the checksum of the output.
 - `output` (String) The merged output.
-
-

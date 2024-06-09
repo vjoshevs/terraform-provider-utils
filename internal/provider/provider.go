@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
@@ -41,6 +42,12 @@ func (p *utilsProvider) Resources(ctx context.Context) []func() resource.Resourc
 func (p *utilsProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewYamlMergeDataSource,
+	}
+}
+
+func (p *utilsProvider) Functions(ctx context.Context) []func() function.Function {
+	return []func() function.Function{
+		NewYamlMergeFunction,
 	}
 }
 
