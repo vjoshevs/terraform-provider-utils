@@ -1,3 +1,7 @@
+## 0.2.6 (unreleased)
+
+- Add `yaml_merge` provider function
+
 ## 0.2.5
 
 - Do not overwrite existing values with empty/null values
